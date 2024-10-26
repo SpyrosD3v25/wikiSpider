@@ -1,23 +1,32 @@
 #include <GL/glut.h>
-#include "graphics.h"
-#include "edge.h"
+#include "include/graphics.h"
+#include "include/edge.h"
 #include <iostream>
 #include <vector>
+#include "include/pos_gen.h"
+
+void generate_new_node(Node src) {
+    std::vector<int> pos = {0, 0, 0};
+    src.set_pos(pos);
+    
+    Graph::add_node(src);
+
+    std::vector<int> next_pos = pos_gen::genFrom(src);
+    Node next;
+    next.set_pos(next_pos);
+
+    Graph::add_node(next);
+   
+
+    Edge edge;
+    edge.from = src;
+    edge.to = next;
+    Graph::add_edge(edge);
+}
 
 void create_graph() {
-    Node nd, nd2;
-    std::vector<int> pos = {2, 0, 0};
-    std::vector<int> pos2 = {4, 0, 0};
-    nd.set_pos(pos);
-    nd2.set_pos(pos2);
-    Graphics::graph.add_node(nd);
-    Graphics::graph.add_node(nd2);
-
-   Edge edge;
-   edge.from = nd;
-   edge.to = nd2;
-
-   Graphics::graph.add_edge(edge);
+    Node src;
+    generate_new_node(src);    
 }
 
 int main(int argc, char** argv) {
@@ -25,8 +34,6 @@ int main(int argc, char** argv) {
     
     create_graph();
     Graphics::initialize();
-
-
 
     // OpenGL main loop
     glutDisplayFunc(Graphics::display);

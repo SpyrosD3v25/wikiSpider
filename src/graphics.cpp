@@ -1,34 +1,49 @@
 #include "graphics.h"
 #include "node.h"
 #include "graph.h"
+#include "camera.h"
+#include "screen.h"
 #include <GL/glut.h>
 #include <iostream>
+#include <string>
+#include <vector>
 
+/* Camera */
+float Camera::posX = 0.0f;
+float Camera::posY = 0.0f;
+float Camera::posZ = 12.0f;
+float Camera::dirX = 0.0f;
+float Camera::dirY = 0.0f;
+float Camera::dirZ = -1.0f;
+float Camera::pitch = 0.0f;
+float Camera::yaw = 0.0f;
 
-Graph Graphics::graph;
-float Graphics::camPosX = 0.0f;
-float Graphics::camPosY = 0.0f;
-float Graphics::camPosZ = 5.0f;  // Camera starts 5 units away from the scene
-
-float Graphics::camDirX = 0.0f;
-float Graphics::camDirY = 0.0f;
-float Graphics::camDirZ = -1.0f; // Looking forward
+/* Input */
 bool Graphics::keyStates[256] = {false};
 int Graphics::lastMousePosX = 960;
 int Graphics::lastMousePosY = 540;
-float Graphics::camYaw = 0.0f;
-float Graphics::camPitch = 0.0f;
+
+/* Screen */
+int Screen::width = 1920;
+int Screen::height = 1080;
+std::string Screen::title = "wikispider";
+std::vector<float> Screen::color = {0.0, 0.0, 0.0, 1.0};
 
 void Graphics::initialize() {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(1920, 1080); //hardcoded values 
-    glutCreateWindow("wikispider"); //hardcoded values
+    glutInitWindowSize(Screen::width, Screen::height); 
+    glutCreateWindow(Screen::title.c_str()); 
 
     glEnable(GL_DEPTH_TEST); 
     glShadeModel(GL_SMOOTH);
     glEnable(GL_MULTISAMPLE);
-    glClearColor(0.0, 0.0, 0.0, 1.0);  //hardcoded values
+    glClearColor(
+            Screen::color[0],
+            Screen::color[1],
+            Screen::color[2],
+            Screen::color[3]);  
     glutWarpPointer(lastMousePosX, lastMousePosY);
+
 
     glutKeyboardFunc(Graphics::handleKeyPress);
     glutKeyboardUpFunc(Graphics::handleKeyRelease);
@@ -40,11 +55,11 @@ void Graphics::display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glLoadIdentity();
 
-    glRotatef(camPitch, 1.0f, 0.0f, 0.0f);
-    glRotatef(camYaw, 0.0f, 1.0f, 0.0f);
+    glRotatef(Camera::pitch, 1.0f, 0.0f, 0.0f);
+    glRotatef(Camera::yaw, 0.0f, 1.0f, 0.0f);
 
-    gluLookAt(camPosX, camPosY, camPosZ, 
-              camPosX + camDirX, camPosY + camDirY, camPosZ + camDirZ, 
+    gluLookAt(Camera::posX, Camera::posY, Camera::posZ, 
+              Camera::posX + Camera::dirX, Camera::posY + Camera::dirY, Camera::posZ + Camera::dirZ, 
               0.0, 1.0, 0.0); 
 
     drawGraph();
@@ -83,12 +98,12 @@ void Graphics::drawEdge(Edge edge) {
 }
 
 void Graphics::drawGraph() {
-    const std::vector<Node>& nodes = Graphics::graph.get_nodes();
+    const std::vector<Node>& nodes = Graph::get_nodes();
     for (const Node& node : nodes) {
         drawNode(node);
     }
 
-    const std::vector<Edge>& edges = Graphics::graph.get_edges();
+    const std::vector<Edge>& edges = Graph::get_edges();
     for (const Edge& edge : edges) {
         drawEdge(edge);
     }
@@ -104,22 +119,22 @@ void Graphics::handleKeyRelease(unsigned char key, int x, int y) {
 
 void Graphics::updateCamera() {
     if (keyStates['w']) {
-        camPosZ -= 0.05f;
+        Camera::posZ -= 0.05f;
     }
     if (keyStates['s']) {
-        camPosZ += 0.05f;
+        Camera::posZ += 0.05f;
     }
     if (keyStates['a']) {
-        camPosX -= 0.05f;
+        Camera::posX -= 0.05f;
     }
     if (keyStates['d']) {
-        camPosX += 0.05f;
+        Camera::posX += 0.05f;
     }
     if (keyStates[' ']) {
-        camPosY += 0.05f;
+        Camera::posY += 0.05f;
     }
     if (keyStates['x']) {
-        camPosY -= 0.05f;
+        Camera::posY -= 0.05f;
     }
     glutPostRedisplay();
 }
@@ -128,11 +143,11 @@ void Graphics::mouseMotion(int x, int y) {
     int deltaX = x - lastMousePosX; 
     int deltaY = y - lastMousePosY; 
 
-    camYaw += deltaX * 0.1f; 
-    camPitch += deltaY * 0.1f; 
+    Camera::yaw += deltaX * 0.1f; 
+    Camera::pitch += deltaY * 0.1f; 
 
-    if (camPitch > 89.0f) camPitch = 89.0f;
-    if (camPitch < -89.0f) camPitch = -89.0f;
+    if (Camera::pitch > 89.0f) Camera::pitch = 89.0f;
+    if (Camera::pitch < -89.0f) Camera::pitch = -89.0f;
 
     lastMousePosX = x; 
     lastMousePosY = y;

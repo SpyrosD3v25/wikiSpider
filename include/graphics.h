@@ -4,6 +4,7 @@
 #include "graph.h"
 #include "node.h"
 #include "edge.h"
+#include "camera.h"
 
 class Graphics {
 public:
@@ -18,8 +19,6 @@ public:
     static void updateCamera();
     static void mouseMotion(int x, int y);
 
-    static Graph graph;
-    static float camPosX, camPosY, camPosZ, camDirX, camDirY, camDirZ, camYaw, camPitch;
     static bool keyStates[256];
     static int lastMousePosX, lastMousePosY;
 };
