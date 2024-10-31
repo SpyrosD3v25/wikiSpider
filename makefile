@@ -38,5 +38,5 @@ src/%.o: src/%.cpp
 
 # Clean rule to remove compiled files
 clean:
-	rm -f $(LIB_OBJ) $(TARGET) $(LIBRARY)
+	rm -f $(LIB_OBJ) $(LIBRARY)
 

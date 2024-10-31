@@ -7,6 +7,14 @@
 #include <array>
 
 void create_graph() {
+    /* 
+       Example of creating a graph
+       A node src at position (0,0,0)
+       A node next at a position randomly generated
+       Printing the graph
+       Displaying the graph usign OPENGL
+    */
+
     Graph graph;
 
     Node src;
