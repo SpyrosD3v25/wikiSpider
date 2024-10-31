@@ -1,32 +1,25 @@
-#include <GL/glut.h>
 #include "include/graphics.h"
-#include "include/edge.h"
+#include "include/pos_gen.h"
+#include "include/graph.h"
+#include <GL/glut.h>
 #include <iostream>
 #include <vector>
-#include "include/pos_gen.h"
-
-void generate_new_node(Node src) {
-    std::vector<int> pos = {0, 0, 0};
-    src.set_pos(pos);
-    
-    Graph::add_node(src);
-
-    std::vector<int> next_pos = pos_gen::genFrom(src);
-    Node next;
-    next.set_pos(next_pos);
-
-    Graph::add_node(next);
-   
-
-    Edge edge;
-    edge.from = src;
-    edge.to = next;
-    Graph::add_edge(edge);
-}
+#include <array>
 
 void create_graph() {
+    Graph graph;
+
     Node src;
-    generate_new_node(src);    
+    std::array<int, 3> pos = {0, 0, 0};
+    src.set_pos(pos);
+    graph.add_node(src);
+
+    Node next;
+    std::array<int, 3> next_pos = pos_gen::genFrom(graph, src);
+    next.set_pos(next_pos);
+    graph.add_node(next);
+    graph.print_graph();
+    Graphics::graphs.push_back(graph);
 }
 
 int main(int argc, char** argv) {
@@ -35,11 +28,19 @@ int main(int argc, char** argv) {
     create_graph();
     Graphics::initialize();
 
-    // OpenGL main loop
     glutDisplayFunc(Graphics::display);
     glutReshapeFunc(Graphics::reshape);
-    //glutKeyboardFunc(Graphics::awaitKeyboard);
     glutMainLoop();  
     return 0;
 }
+/*
+   Fix id generation and update
+   Input handling should not be on the Graphics class
+   Node should hold properties for its graphic representation as well
+   An edge could be bidrectional
+   Show the direction of edges
 
+   implement algorithms on the graph class
+   implement the algorithm representation by changing the color of nodes
+   hovering the mouse over a node could give some detail about it
+*/

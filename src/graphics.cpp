@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 /* Camera */
 float Camera::posX = 0.0f;
@@ -29,6 +30,9 @@ int Screen::height = 1080;
 std::string Screen::title = "wikispider";
 std::vector<float> Screen::color = {0.0, 0.0, 0.0, 1.0};
 
+/* Graphs */
+std::vector<Graph> Graphics::graphs = {};
+
 void Graphics::initialize() {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(Screen::width, Screen::height); 
@@ -43,7 +47,6 @@ void Graphics::initialize() {
             Screen::color[2],
             Screen::color[3]);  
     glutWarpPointer(lastMousePosX, lastMousePosY);
-
 
     glutKeyboardFunc(Graphics::handleKeyPress);
     glutKeyboardUpFunc(Graphics::handleKeyRelease);
@@ -62,7 +65,7 @@ void Graphics::display() {
               Camera::posX + Camera::dirX, Camera::posY + Camera::dirY, Camera::posZ + Camera::dirZ, 
               0.0, 1.0, 0.0); 
 
-    drawGraph();
+    Graphics::drawGraphs();
 
     glutSwapBuffers();
 }
@@ -78,16 +81,16 @@ void Graphics::reshape(int width, int height) {
 }
 
 void Graphics::drawNode(const Node& node) {
-    const std::vector<int>& pos = node.get_pos();
+    const std::array<int, 3>& pos = node.get_pos();
     glPushMatrix();
     glTranslatef(pos[0], pos[1], pos[2]);
     glutSolidSphere(0.2, 100, 100); //hardcoded values here must change
     glPopMatrix();
 }
 
-void Graphics::drawEdge(Edge edge) {
-    const std::vector<int>& posFrom = edge.from.get_pos();
-    const std::vector<int>& posTo = edge.to.get_pos();
+void Graphics::drawEdge(const Node& from, const Node& to) {
+    const std::array<int, 3>& posFrom = from.get_pos();
+    const std::array<int, 3>& posTo = to.get_pos();
     glBegin(GL_LINES);
     glColor3f(1.0f, 1.0f, 1.0f);
 
@@ -97,15 +100,29 @@ void Graphics::drawEdge(Edge edge) {
     glEnd();
 }
 
-void Graphics::drawGraph() {
-    const std::vector<Node>& nodes = Graph::get_nodes();
-    for (const Node& node : nodes) {
-        drawNode(node);
-    }
+void Graphics::drawGraph(Graph graph) {
+    std::map<int, bool> vis;
+    for(const Node& node : graph.get_nodes()) {vis[node.get_id()] = false;}
 
-    const std::vector<Edge>& edges = Graph::get_edges();
-    for (const Edge& edge : edges) {
-        drawEdge(edge);
+    for (const Node& node : graph.get_nodes()) {
+        drawNode(node);
+        vis[node.get_id()] = true;
+        
+        for(const Node& nd : node.get_neighbors()) {
+            if(vis[nd.get_id()] == false) {
+               drawNode(nd);
+               drawEdge(node, nd);
+               drawEdge(nd, node);
+
+               vis[nd.get_id()] = true;
+            }
+        } 
+    }
+}
+
+void Graphics::drawGraphs() {
+    for (Graph graph : Graphics::graphs) {
+        drawGraph(graph);
     }
 }
 
